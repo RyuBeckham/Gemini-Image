@@ -109,14 +109,14 @@ if st.session_state.image_history:
 if st.session_state.image_history:
     for i, image in enumerate(st.session_state.image_history):
         buf=BytesIO()
-        image.save(buf, format="PNG", optimize=True)
+        image.save(buf, format="HEIF")
         image.thumbnail(size=(1024, 1024))
         st.image(image)
         st.download_button(
             label="📥 下載",
             data=buf.getvalue(),
-            file_name=f"generated_image.png",
-            mime="image/png",
+            file_name=f"generated_image.heic",
+            mime="image/heic",
             key=f"download_btn_{i}"
         )
 else:
