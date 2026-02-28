@@ -19,7 +19,7 @@ st.set_page_config(page_title="Gemini Image 影像生成", page_icon="🍌")
 st.title("🍌 影像生成")
 st.caption("Powered by Gemini 3.1 Flash Image Preview")
 
-prompt_default = "以圖2的構圖用圖1的人物生成寫實人像照片，比例3:4"
+prompt_default = "realistic cinematic, more details, aspect ratio 3:4."
 
 if "image_history" not in st.session_state:
     st.session_state.image_history = []
@@ -34,11 +34,12 @@ def update_text_area():
 api_key = os.getenv("GEMINI_API_KEY")
     
 resolutions = {
+            "512x512"  : "512px",
             "1024x1024": "1K",
             "2048x2048": "2K",
             "4096x4096": "4K",
 }
-selected_label = st.sidebar.selectbox("🖼️ 解析度", list(resolutions.keys()))
+selected_label = st.sidebar.selectbox("🖼️ 解析度", list(resolutions.keys()), index=1)
 resolution = resolutions[selected_label]
 
 uploade_files = st.sidebar.file_uploader("圖片", type=["jpg", "jpeg", "png", "webp", "heic", "heif"], accept_multiple_files=True)
@@ -57,7 +58,7 @@ st.text_area("你想畫什麼？請描述你的畫面：",
             height=100, key="prompt")
 
 if st.button("✨ 生成圖片", type="primary", on_click=update_text_area):
-    with st.spinner("正在為您作畫中，請稍候..."):
+    with st.spinner("正在為您作畫中，請稍候...", show_time=True, width="content"):
         try:
             client = genai.Client()
             contents = [st.session_state["prompt"]]
@@ -67,7 +68,7 @@ if st.button("✨ 生成圖片", type="primary", on_click=update_text_area):
                 model="gemini-3.1-flash-image-preview",
                 contents=contents,
                 config=types.GenerateContentConfig(
-                    response_modalities=["TEXT", "IMAGE"],
+                    response_modalities=["IMAGE"],
                     seed=random.randint(0, 2147483647),
                     image_config=types.ImageConfig(
                         image_size=resolution,
@@ -106,7 +107,17 @@ if st.session_state.image_history:
         st.rerun()
 
 if st.session_state.image_history:
-    for image in st.session_state.image_history:
+    for i, image in enumerate(st.session_state.image_history):
+        buf=BytesIO()
+        image.save(buf, format="PNG", optimize=True)
+        image.thumbnail(size=(1024, 1024))
         st.image(image)
+        st.download_button(
+            label="📥 下載",
+            data=buf.getvalue(),
+            file_name=f"generated_image.png",
+            mime="image/png",
+            key=f"download_btn_{i}"
+        )
 else:
     st.info("目前還沒有生成的圖片喔！趕快在上方輸入指令召喚第一張圖片吧。")
