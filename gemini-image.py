@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 import random
+import time
 from google import genai
 from google.genai import types
 from PIL import Image
@@ -10,14 +11,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+current_time = int(time.time())
+random.seed = current_time
+
 st.set_page_config(page_title="Gemini Image 影像生成", page_icon="🍌")
-st.title("🍌 影像生成器")
+st.title("🍌 影像生成")
 st.caption("Powered by Gemini 3.1 Flash Image Preview")
 
 api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    st.error("⚠️ 找不到 API Key！請確認你已經建立了 .env 檔案，並設定了 GEMINI_API_KEY 變數。")
-    st.stop()
     
 resolutions = {
             "1024x1024": "1K",
